@@ -1,4 +1,4 @@
-name: Build My Firmware
+name: Build Firmware
 
 on:
   workflow_dispatch:
@@ -7,9 +7,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout my firmware
+    - name: Checkout repository
       uses: actions/checkout@v4
       with:
+        repository: Franklnir/xiaozhi-AI-esp32c3-mini
         path: firmware
 
     - name: Install ESP-IDF
@@ -27,10 +28,9 @@ jobs:
       run: |
         source ~/esp/esp-idf/export.sh
         cd $GITHUB_WORKSPACE/firmware
+        echo "CONFIG_NEWS_API_URL=\"http://x9262592.beget.tech/tin-moi-nhat\"" >> sdkconfig.defaults.esp32c3
         idf.py set-target esp32c3
         idf.py build
-        
-        # Создаём объединённый образ для прошивки на 0x0000
         cd build
         esptool.py --chip esp32c3 merge_bin \
           -o merged_firmware.bin \
