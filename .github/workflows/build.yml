@@ -7,16 +7,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout xiaozhi-esp32
+    - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        repository: 78/xiaozhi-esp32
-        path: xiaozhi-esp32
+        repository: babosa/xiaozhi-esp32c3
+        path: firmware
 
     - name: Install ESP-IDF
       run: |
         sudo apt update
-        sudo apt install -y git wget flex bison gperf python3 python3-pip python3-venv cmake ninja-build ccache libffi-dev libssl-dev dfu-util
+        sudo apt install -y git wget flex bison gperf python3 python3-pip cmake ninja-build ccache libffi-dev libssl-dev dfu-util
         mkdir -p ~/esp
         cd ~/esp
         git clone --recursive https://github.com/espressif/esp-idf.git
@@ -24,27 +24,15 @@ jobs:
         ./install.sh esp32c3
         echo "source ~/esp/esp-idf/export.sh" >> ~/.bashrc
 
-    - name: Configure
-      run: |
-        source ~/esp/esp-idf/export.sh
-        cd $GITHUB_WORKSPACE/xiaozhi-esp32
-        echo "CONFIG_I2C_MASTER_SDA=21" >> sdkconfig.defaults
-        echo "CONFIG_I2C_MASTER_SCL=22" >> sdkconfig.defaults
-        echo "CONFIG_OLED_I2C_ADDRESS=0x3C" >> sdkconfig.defaults
-        echo "CONFIG_TOUCH_BUTTON_ENABLED=y" >> sdkconfig.defaults
-        echo "CONFIG_MIC_ENABLED=y" >> sdkconfig.defaults
-        echo "CONFIG_WIFI_AP_MODE=y" >> sdkconfig.defaults
-        echo "CONFIG_NEWS_API_URL=\"http://x9262592.beget.tech/tin-moi-nhat\"" >> sdkconfig.defaults
-
     - name: Build
       run: |
         source ~/esp/esp-idf/export.sh
-        cd $GITHUB_WORKSPACE/xiaozhi-esp32
+        cd $GITHUB_WORKSPACE/firmware
         idf.py set-target esp32c3
         idf.py build
 
-    - name: Upload firmware
+    - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: firmware
-        path: ${{ github.workspace }}/xiaozhi-esp32/build/*.bin
+        path: ${{ github.workspace }}/firmware/build/*.bin
