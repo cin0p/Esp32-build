@@ -1,4 +1,4 @@
-name: Build Xiaozhi C3 Firmware
+name: Build Xiaozhi C3 Final
 
 on:
   workflow_dispatch:
@@ -28,9 +28,37 @@ jobs:
       run: |
         source ~/esp/esp-idf/export.sh
         cd $GITHUB_WORKSPACE/firmware
+        
+        # Язык русский
         echo "CONFIG_LANGUAGE_RU_RU=y" >> sdkconfig.defaults
+        
+        # Новостной сервер
         echo "CONFIG_NEWS_API_URL=\"http://x9262592.beget.tech/tin-moi-nhat\"" >> sdkconfig.defaults
+        
+        # Плата
         echo "CONFIG_BOARD_TYPE_XMINI_C3=y" >> sdkconfig.defaults
+        
+        # OLED SSD1306 (SDA=8, SCL=5)
+        echo "CONFIG_OLED_SSD1306_128X64=y" >> sdkconfig.defaults
+        echo "CONFIG_I2C_MASTER_SDA=8" >> sdkconfig.defaults
+        echo "CONFIG_I2C_MASTER_SCL=5" >> sdkconfig.defaults
+        echo "CONFIG_OLED_I2C_ADDRESS=0x3C" >> sdkconfig.defaults
+        
+        # MAX98357A (BCLK=7, LRCLK=3, DIN=6)
+        echo "CONFIG_I2S_SPEAKER_BCK=7" >> sdkconfig.defaults
+        echo "CONFIG_I2S_SPEAKER_LRCK=3" >> sdkconfig.defaults
+        echo "CONFIG_I2S_SPEAKER_DATA=6" >> sdkconfig.defaults
+        
+        # INMP441 (SCK=1, WS=2, SD=10)
+        echo "CONFIG_I2S_MIC_BCK=1" >> sdkconfig.defaults
+        echo "CONFIG_I2S_MIC_WS=2" >> sdkconfig.defaults
+        echo "CONFIG_I2S_MIC_DATA=10" >> sdkconfig.defaults
+        
+        # Кнопка TP223 (GPIO 9)
+        echo "CONFIG_TOUCH_BUTTON_GPIO=9" >> sdkconfig.defaults
+        
+        # MCP
+        echo "CONFIG_MCP_ENABLED=y" >> sdkconfig.defaults
 
     - name: Build
       run: |
