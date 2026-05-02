@@ -24,20 +24,43 @@ jobs:
         ./install.sh esp32c3
         echo "source ~/esp/esp-idf/export.sh" >> ~/.bashrc
 
-    - name: Configure
+    - name: Configure and fix pins
       run: |
         source ~/esp/esp-idf/export.sh
         cd $GITHUB_WORKSPACE/firmware
+        
+        # Копируем таблицу разделов v2
         cp partitions/v2/4m.csv partitions.csv
-        echo "CONFIG_I2S_MIC_BCK=1" >> sdkconfig.defaults.esp32c3
-        echo "CONFIG_I2S_MIC_WS=2" >> sdkconfig.defaults.esp32c3
-        echo "CONFIG_I2S_MIC_DATA=10" >> sdkconfig.defaults.esp32c3
-        echo "CONFIG_I2S_SPEAKER_BCK=7" >> sdkconfig.defaults.esp32c3
-        echo "CONFIG_I2S_SPEAKER_LRCK=3" >> sdkconfig.defaults.esp32c3
-        echo "CONFIG_I2S_SPEAKER_DATA=6" >> sdkconfig.defaults.esp32c3
-        echo "CONFIG_OLED_SDA=8" >> sdkconfig.defaults.esp32c3
-        echo "CONFIG_OLED_SCL=5" >> sdkconfig.defaults.esp32c3
-        echo "CONFIG_BUTTON_GPIO=9" >> sdkconfig.defaults.esp32c3
+        
+        # Заменяем пины в исходниках (main.cc или config.h)
+        # Ищем и меняем все стандартные пины на ваши
+        find main -type f \( -name "*.cc" -o -name "*.h" -o -name "*.cpp" \) -exec sed -i \
+          -e 's/GPIO_NUM_5/GPIO_NUM_99/g' \
+          -e 's/GPIO_NUM_6/GPIO_NUM_98/g' \
+          -e 's/GPIO_NUM_4/GPIO_NUM_97/g' \
+          -e 's/GPIO_NUM_8/GPIO_NUM_96/g' \
+          -e 's/GPIO_NUM_9/GPIO_NUM_95/g' \
+          -e 's/GPIO_NUM_3/GPIO_NUM_94/g' {} +
+        
+        # OLED SDA=5, SCL=4
+        find main -type f \( -name "*.cc" -o -name "*.h" -o -name "*.cpp" \) -exec sed -i \
+          -e 's/GPIO_NUM_99/GPIO_NUM_5/g' \
+          -e 's/GPIO_NUM_98/GPIO_NUM_4/g' \
+          -e 's/GPIO_NUM_97/GPIO_NUM_8/g' \
+          -e 's/GPIO_NUM_96/GPIO_NUM_1/g' \
+          -e 's/GPIO_NUM_95/GPIO_NUM_2/g' \
+          -e 's/GPIO_NUM_94/GPIO_NUM_10/g' {} +
+        
+        # Кнопка GPIO 9
+        find main -type f \( -name "*.cc" -o -name "*.h" -o -name "*.cpp" \) -exec sed -i \
+          -e 's/GPIO_NUM_3/GPIO_NUM_9/g' {} +
+        
+        # Динамик BCLK=7, LRC=3, DIN=6
+        find main -type f \( -name "*.cc" -o -name "*.h" -o -name "*.cpp" \) -exec sed -i \
+          -e 's/GPIO_NUM_5/GPIO_NUM_7/g' \
+          -e 's/GPIO_NUM_6/GPIO_NUM_6/g' {} +
+        
+        # Новостной сервер
         echo "CONFIG_NEWS_API_URL=\"http://x9262592.beget.tech/tin-moi-nhat\"" >> sdkconfig.defaults.esp32c3
 
     - name: Build
