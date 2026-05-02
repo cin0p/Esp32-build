@@ -29,6 +29,9 @@ jobs:
         source ~/esp/esp-idf/export.sh
         cd $GITHUB_WORKSPACE/firmware
         
+        # Копируем таблицу разделов v2 (factory=0x10000)
+        cp partitions/v2/partitions.csv partitions.csv
+        
         # Пины под ваше железо
         echo "CONFIG_I2S_MIC_BCK=1" >> sdkconfig.defaults.esp32c3
         echo "CONFIG_I2S_MIC_WS=2" >> sdkconfig.defaults.esp32c3
