@@ -8,9 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     container: espressif/idf:v5.3.1
     steps:
-    - name: Clone xiaozhi-esp32
-      run: |
-        git clone https://github.com/xiaozhi-esp32/xiaozhi-esp32.git
+    - name: Checkout xiaozhi-esp32
+      uses: actions/checkout@v4
+      with:
+        repository: xiaozhi-esp32/xiaozhi-esp32
+        path: xiaozhi-esp32
 
     - name: Configure
       run: |
