@@ -10,7 +10,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        repository: Kevincoooool/xiaozhi_c3_hardware
+        repository: Franklnir/xiaozhi-AI-esp32c3-mini
         path: firmware
 
     - name: Install ESP-IDF
@@ -19,15 +19,34 @@ jobs:
         sudo apt install -y git wget flex bison gperf python3 python3-pip cmake ninja-build ccache libffi-dev libssl-dev dfu-util
         mkdir -p ~/esp
         cd ~/esp
-        git clone --recursive https://github.com/espressif/esp-idf.git
+        git clone --recursive https://github.com/espressif/esp-idf.git -b v5.5
         cd esp-idf
         ./install.sh esp32c3
         echo "source ~/esp/esp-idf/export.sh" >> ~/.bashrc
 
+    - name: Configure
+      run: |
+        source ~/esp/esp-idf/export.sh
+        cd $GITHUB_WORKSPACE/firmware
+        
+        # Пины под ваше железо
+        echo "CONFIG_I2S_MIC_BCK=1" >> sdkconfig.defaults.esp32c3
+        echo "CONFIG_I2S_MIC_WS=2" >> sdkconfig.defaults.esp32c3
+        echo "CONFIG_I2S_MIC_DATA=10" >> sdkconfig.defaults.esp32c3
+        echo "CONFIG_I2S_SPEAKER_BCK=7" >> sdkconfig.defaults.esp32c3
+        echo "CONFIG_I2S_SPEAKER_LRCK=3" >> sdkconfig.defaults.esp32c3
+        echo "CONFIG_I2S_SPEAKER_DATA=6" >> sdkconfig.defaults.esp32c3
+        echo "CONFIG_OLED_SDA=8" >> sdkconfig.defaults.esp32c3
+        echo "CONFIG_OLED_SCL=5" >> sdkconfig.defaults.esp32c3
+        echo "CONFIG_BUTTON_GPIO=9" >> sdkconfig.defaults.esp32c3
+        
+        # Новостной сервер
+        echo "CONFIG_NEWS_API_URL=\"http://x9262592.beget.tech/tin-moi-nhat\"" >> sdkconfig.defaults.esp32c3
+
     - name: Build
       run: |
         source ~/esp/esp-idf/export.sh
-        cd $GITHUB_WORKSPACE/firmware/Firmware
+        cd $GITHUB_WORKSPACE/firmware
         idf.py set-target esp32c3
         idf.py build
 
@@ -35,4 +54,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: firmware
-        path: ${{ github.workspace }}/firmware/Firmware/build/*.bin
+        path: ${{ github.workspace }}/firmware/build/*.bin
