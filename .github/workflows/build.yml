@@ -28,11 +28,7 @@ jobs:
       run: |
         source ~/esp/esp-idf/export.sh
         cd $GITHUB_WORKSPACE/firmware
-        
-        # Копируем таблицу разделов v2 (factory=0x10000)
-        cp partitions/v2/partitions.csv partitions.csv
-        
-        # Пины под ваше железо
+        cp partitions/v2/4m.csv partitions.csv
         echo "CONFIG_I2S_MIC_BCK=1" >> sdkconfig.defaults.esp32c3
         echo "CONFIG_I2S_MIC_WS=2" >> sdkconfig.defaults.esp32c3
         echo "CONFIG_I2S_MIC_DATA=10" >> sdkconfig.defaults.esp32c3
@@ -42,8 +38,6 @@ jobs:
         echo "CONFIG_OLED_SDA=8" >> sdkconfig.defaults.esp32c3
         echo "CONFIG_OLED_SCL=5" >> sdkconfig.defaults.esp32c3
         echo "CONFIG_BUTTON_GPIO=9" >> sdkconfig.defaults.esp32c3
-        
-        # Новостной сервер
         echo "CONFIG_NEWS_API_URL=\"http://x9262592.beget.tech/tin-moi-nhat\"" >> sdkconfig.defaults.esp32c3
 
     - name: Build
