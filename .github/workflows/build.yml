@@ -1,4 +1,4 @@
-name: Build Firmware
+name: Build Xiaozhi C3 Firmware
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        repository: babosa/xiaozhi-esp32c3
+        repository: nxtreaming/xiaozhi-esp32c3
         path: firmware
 
     - name: Install ESP-IDF
@@ -24,6 +24,14 @@ jobs:
         ./install.sh esp32c3
         echo "source ~/esp/esp-idf/export.sh" >> ~/.bashrc
 
+    - name: Configure
+      run: |
+        source ~/esp/esp-idf/export.sh
+        cd $GITHUB_WORKSPACE/firmware
+        echo "CONFIG_LANGUAGE_RU_RU=y" >> sdkconfig.defaults
+        echo "CONFIG_NEWS_API_URL=\"http://x9262592.beget.tech/tin-moi-nhat\"" >> sdkconfig.defaults
+        echo "CONFIG_BOARD_TYPE_XMINI_C3=y" >> sdkconfig.defaults
+
     - name: Build
       run: |
         source ~/esp/esp-idf/export.sh
@@ -31,7 +39,7 @@ jobs:
         idf.py set-target esp32c3
         idf.py build
 
-    - name: Upload
+    - name: Upload firmware
       uses: actions/upload-artifact@v4
       with:
         name: firmware
