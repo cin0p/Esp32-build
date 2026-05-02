@@ -1,4 +1,4 @@
-name: Build Xiaozhi Firmware
+name: Build Firmware
 
 on:
   workflow_dispatch:
@@ -6,28 +6,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: espressif/idf:v5.3.1
     steps:
-    - name: Checkout xiaozhi-esp32
-      uses: actions/checkout@v4
-      with:
-        repository: xiaozhi-esp32/xiaozhi-esp32
-        path: xiaozhi-esp32
-        submodules: recursive
-
-    - name: Install ESP-IDF
+    - name: Clone xiaozhi-esp32
       run: |
-        sudo apt-get update
-        sudo apt-get install -y git wget flex bison gperf python3 python3-pip cmake ninja-build ccache libffi-dev libssl-dev dfu-util
-        mkdir -p ~/esp
-        cd ~/esp
-        git clone --recursive https://github.com/espressif/esp-idf.git
-        cd esp-idf
-        ./install.sh esp32c3
+        git clone https://github.com/xiaozhi-esp32/xiaozhi-esp32.git
 
-    - name: Configure and build
+    - name: Configure
       run: |
-        source ~/esp/esp-idf/export.sh
-        cd $GITHUB_WORKSPACE/xiaozhi-esp32
+        cd xiaozhi-esp32
         echo "CONFIG_I2C_MASTER_SDA=21" >> sdkconfig.defaults
         echo "CONFIG_I2C_MASTER_SCL=22" >> sdkconfig.defaults
         echo "CONFIG_OLED_I2C_ADDRESS=0x3C" >> sdkconfig.defaults
@@ -35,11 +22,15 @@ jobs:
         echo "CONFIG_MIC_ENABLED=y" >> sdkconfig.defaults
         echo "CONFIG_WIFI_AP_MODE=y" >> sdkconfig.defaults
         echo "CONFIG_NEWS_API_URL=\"http://x9262592.beget.tech/tin-moi-nhat\"" >> sdkconfig.defaults
+
+    - name: Build
+      run: |
+        cd xiaozhi-esp32
         idf.py set-target esp32c3
         idf.py build
 
-    - name: Upload firmware
+    - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: firmware
-        path: ${{ github.workspace }}/xiaozhi-esp32/build/*.bin
+        path: xiaozhi-esp32/build/*.bin
